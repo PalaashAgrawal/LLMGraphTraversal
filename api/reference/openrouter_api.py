@@ -6,7 +6,7 @@ import json
 from shared import constants
 
 # api_key, selected_model = sidebar(constants.OPENROUTER_DEFAULT_CHAT_MODEL)
-api_key = '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'
+api_key = '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'
 selected_model = 'anthropic/claude-2'
 
 # st.title("💬 Streamlit GPT")
