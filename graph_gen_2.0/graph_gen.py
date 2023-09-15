@@ -70,9 +70,6 @@ class create_level():
 
 
 
-graph_creator = create_level(6)
-adj, shortest_path = graph_creator.create_graph(1)
-print(adj)
-print(shortest_path)
+
 
 
