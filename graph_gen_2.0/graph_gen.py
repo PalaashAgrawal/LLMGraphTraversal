@@ -78,10 +78,12 @@ class create_level():
 
             return _get_level2
         
-        if level ==3:
-            def _get_level3(n):
+        if level ==3 or level ==4:
+            def _get_level_3_4(n):
                 f'use a random tree, then add random paths between random nodes in the shortest path of the original graph. '
                 graph = nx.random_tree(n, seed = int(10000*random.random()))
+
+                #relabel the nodes in order through a DFS traversal
                 graph = self._get_ordered_graph(graph)
 
                 shortest_path = nx.shortest_path(graph, source=0, target=n-1, weight=None, method='dijkstra')
@@ -101,20 +103,26 @@ class create_level():
                         start_node = new_node
                         new_node+=1
                     graph.add_edge(start_node, end_node)
-
-                    
                 
-                #relabel the nodes in order through a DFS traversal
+                if level ==4:
+                    #add random weights 
+                    for edge in graph.edges(): graph[edge[0]][edge[1]]['weight'] = random.randint(1, 5)
+
+                
+                
                 
                 return graph
 
-            return _get_level3
+            return _get_level_3_4
+        
+
+
 
 
      
     
     def get_shortest_path(self, graph, source, target):
-        shortest_path = nx.shortest_path(graph, source=source, target=target, weight=None, method='dijkstra')
+        shortest_path = nx.shortest_path(graph, source=source, target=target, weight='weight', method='dijkstra')
         ret = f''
         for node in shortest_path[:-1]: ret+=f'{node} -> '
         return ret+str(shortest_path[-1])
@@ -158,7 +166,7 @@ class create_level():
         return graph
 
 
-gen = create_level(n=10, is_jumbled=True)
-out, sh = gen.create_graph(level = 3)
+gen = create_level(n=10, is_jumbled=False)
+out, sh = gen.create_graph(level = 4)
 print(out)
 print(sh)
