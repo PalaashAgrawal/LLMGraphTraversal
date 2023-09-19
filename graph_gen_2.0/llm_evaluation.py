@@ -8,6 +8,9 @@ model = 'openai/gpt-4'
 graph_creator = create_level(n=10, is_jumbled = True)
 adj, shortest_path = graph_creator.create_graph(level = 2)
 
+
+
+#TO DO, clearly write if we want the SHORTEST path, or the path with the least weight. Also mention if it is a directed/weighted graph. 
 prompt = f'''
 Given the adjacency graph below, what is the quickest path from {shortest_path[0]} to {shortest_path[-1]}?
 

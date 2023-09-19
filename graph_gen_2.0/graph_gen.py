@@ -126,8 +126,8 @@ class create_level():
 
             return _get_level_3_4
         
-        if level ==5:
-            def _get_level_5(n):
+        if level ==5 or level==6:
+            def _get_level_5_6(n):
                 f'grid'
                 m = int(math.sqrt(n))+1
                 # dimensions = m,m+random.randint(0,2)
@@ -174,8 +174,19 @@ class create_level():
                 #total number of nodes change after removing nodes. 
                 self.n = len(graph.nodes)
 
+                if level ==6:
+                    #add random weights 
+                    for edge in graph.edges(): graph[edge[0]][edge[1]]['weight'] = random.randint(1, 5)
+
                 return graph 
-            return _get_level_5
+            
+                
+
+            return _get_level_5_6
+        
+
+        if level ==7:
+            
                 
 
 
