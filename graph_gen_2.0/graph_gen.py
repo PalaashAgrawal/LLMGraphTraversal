@@ -24,6 +24,7 @@ class create_level():
 
         self.n = n
         self.is_jumbled = is_jumbled
+        random.seed(10000*random.random())
 
     def create_graph(self, level:int):
 
@@ -80,6 +81,8 @@ class create_level():
         
         if level ==3 or level ==4:
             def _get_level_3_4(n):
+                assert n<=25, f'n cannot exceed 25. The adjacency matrix cannot be represented properly beyond that'
+
                 f'use a random tree, then add random paths between random nodes in the shortest path of the original graph. '
                 graph = nx.random_tree(n, seed = int(10000*random.random()))
 
@@ -95,6 +98,14 @@ class create_level():
                     start_node, end_node = nodes_to_connect
                     #decide how many extra nodes should be there in the path that we are creating.
                     num_extra_nodes = random.randint(1, len(shortest_path))
+                    
+                    #total number of nodes should not exceed 26, otherwise we run out of letters 
+                    if n+num_extra_nodes> 26: 
+                        num_extra_nodes = 26-n
+                        if num_extra_nodes <= 0: break
+                        
+                    n+=num_extra_nodes
+
                     #now create the new path
                     new_node = len(graph.nodes)
                     for i in range(num_extra_nodes):
@@ -114,6 +125,63 @@ class create_level():
                 return graph
 
             return _get_level_3_4
+        
+        if level ==5:
+            def _get_level_5(n):
+                f'grid'
+                m = int(math.sqrt(n))+1
+                # dimensions = m,m+random.randint(0,2)
+                dimensions = m,m
+                
+                graph = nx.grid_2d_graph(*dimensions)
+                start, end = (0, 0), (dimensions[0]-1, dimensions[1]-1)
+
+
+                #generate all shortest paths and simple paths
+                random.seed(10000*random.random())
+                shortest_path = random.choice(list(nx.all_shortest_paths(graph, start, end)))
+                all_other_paths = list(nx.all_simple_paths(graph, start, end))
+
+                #only keep simple paths that are longer than shortest path
+                
+                shortest_path_length = len(shortest_path)
+                all_other_paths = [path for path in all_other_paths if len(path) > shortest_path_length]
+
+                random.seed(10000*random.random())
+                random.shuffle(all_other_paths)
+
+                #randomly select 3-5 paths from all paths, and remove the edges for the rest
+                kept_paths = random.sample(all_other_paths, random.randint(3,5))
+
+                #convert lists into correct format
+                kept_paths_edges = {(path[i], path[i+1]) for path in kept_paths for i in range(len(path) - 1)}
+                shortest_path_edges = {(shortest_path[i], shortest_path[i+1]) for i in range(len(shortest_path) - 1)}
+
+                #take the union
+                all_paths = kept_paths_edges | shortest_path_edges
+
+                #remove edges
+                for edge in list(graph.edges):
+                    if edge not in kept_paths_edges: graph.remove_edge(*edge)
+
+                #remove any disconnected nodes. 
+                graph = self._remove_disconnected_nodes(graph, start = (0,0))
+
+                #renaming the nodes. 
+                mapping = {node: k for k,node in enumerate(graph.nodes)}
+                graph = nx.relabel_nodes(graph, mapping)
+
+                #total number of nodes change after removing nodes. 
+                self.n = len(graph.nodes)
+
+                return graph 
+            return _get_level_5
+                
+
+
+
+
+
         
 
 
@@ -164,9 +232,35 @@ class create_level():
         graph = nx.relabel_nodes(graph, mapping)
     
         return graph
+    
+
+    def _remove_disconnected_nodes(self,graph, start):
+        connected_edges = set()
+        for a,b in nx.edge_dfs(graph,start): 
+            connected_edges.add(a)
+            connected_edges.add(b)
+        
+        nodes_to_remove = []
+        for node in graph.nodes:
+            if node not in connected_edges: nodes_to_remove.append(node)
+        
+        graph.remove_nodes_from(nodes_to_remove)
+        
+        return graph
 
 
-gen = create_level(n=10, is_jumbled=False)
-out, sh = gen.create_graph(level = 4)
+
+gen = create_level(n=10, is_jumbled=True)
+out, sh = gen.create_graph(level = 5)
 print(out)
 print(sh)
+
+
+# res = set()
+# for i in range(50):
+#     print(i)
+#     gen = create_level(n=20, is_jumbled=False)
+#     out, sh = gen.create_graph(level = 5)
+#     res.add(sh)
+
+# print(res, len(res))
