@@ -26,6 +26,9 @@ class create_level():
 
     def create_graph(self, level:int):
         
+        assert 1<=int(level)<=10
+        self.level = level
+        
         f = self.get_level(level)
         graph = f(self.n)
         # self.n = len(graph.nodes) #sometimes, we add more nodes that n. Eg, level 3
@@ -47,13 +50,38 @@ class create_level():
         
         out = self.convert_adjArray_to_str(adj_array, dict(sorted(mapping.items(), key=lambda x:x[1])))
         
+        
         try:
             shortest_path = self.get_shortest_path(graph, mapping[0], mapping[self.n-1])
+            graph.clear()
+
+            # if level==8: #we want to ensure no solution
+            #     # print(shortest_path)
+            #     #if the code has been able to finish the self.get_shortest_path line, then there exists a solution, so we rerun till we get no solution
+            #     self.__init__(self.n, is_jumbled=self.is_jumbled)
+            #     out, shortest_path = self.create_graph(level = level)
+
             return out, shortest_path
+        
         
         except nx.exception.NetworkXNoPath as e:
             return out, f'No possible path from {mapping[0]} to {mapping[self.n-1]}'
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def convert_adjArray_to_str(self, adj_array, mapping):
         new_line = '\n'
         out = f''''''
@@ -64,7 +92,9 @@ class create_level():
         return out
 
     def get_level(self, level):
-        assert 1<=int(level)<=10
+    
+        
+         
 
         if level==1:
             return  nx.path_graph
@@ -269,21 +299,90 @@ class create_level():
             return _get_level_7
         
         if level==8:
-            pass
+            def _get_level_8(n):
+                f'directed grid with no solution.'
+
+                m = int(math.sqrt(n))+1 #+1 because otherwise for n =10, we get a 3x3 grids, where the total amount of permutations are not enough. 
+                # dimensions = m,m+random.randint(0,2)
+                dimensions = m,m
+                
+                graph = None
+                graph = nx.grid_2d_graph(*dimensions)
+                start, end = (0, 0), (dimensions[0]-1, dimensions[1]-1)
 
 
+                #generate all shortest paths and simple paths
+                random.seed(10000*random.random())
+                shortest_path = random.choice(list(nx.all_shortest_paths(graph, start, end)))
+                all_paths = list(nx.all_simple_paths(graph, start, end))
+
+                #only keep simple paths that are longer than shortest path
+                
+                shortest_path_length = len(shortest_path)
+                all_other_paths = [path for path in all_paths if len(path) > shortest_path_length]
+
+                
+
+                #randomly select 3-5 paths from all paths, and remove the edges for the rest
+                random.seed(10000*random.random())
+                random.shuffle(all_other_paths)
+                kept_paths = random.choices(all_other_paths, k=random.randint(3,5))
+
+                #convert lists into correct format
+                kept_paths_edges = {(path[i], path[i+1]) for path in kept_paths for i in range(len(path) - 1)}
+                shortest_path_edges = {(shortest_path[i], shortest_path[i+1]) for i in range(len(shortest_path) - 1)}
+
+                #take the union
+                all_edges = list(kept_paths_edges | shortest_path_edges) #rename this
 
 
+                #remove edges
+                for edge in list(graph.edges):
+                    if edge not in all_edges: graph.remove_edge(*edge)
+
+                #remove any disconnected nodes. 
+                graph = self._remove_disconnected_nodes(graph, start = (0,0))
+
+                #lets randomly choose 2 paths from all_paths, that will be valid solutions. This doesnt have to include the shortest path necessarily. 
+                random.shuffle(all_edges)
+                
+                forward_paths = random.choices(kept_paths, k=2)
+
+                #populate a new directional graph. The forward paths have forward directioned arrows. For all other paths, arrows are randomly directioned. 
+                graph = nx.DiGraph()
+                covered_nodes = []
+                # for path in forward_paths:
+                #     # for u,v in path:
+                #     for i in range(len(path)-1):
+                #         u,v = path[i], path[i+1]
+                #         graph.add_edge(u,v)
+                #         covered_nodes.append((u,v))
+                
+                for path in all_edges:
+                    for i in range(len(path)-1):
+                        u,v = path[i], path[i+1]
+                        if not (graph.has_edge(u,v) or graph.has_edge(v,u)):
+                            #randomly select direction
+                            (u,v) = (u,v) if random.random()<0.50 else (v,u)
+                            graph.add_edge(u,v)
+                
+
+                #renaming the nodes. 
+                nodes = sorted([node for node in graph.nodes], key= lambda x: m*x[0] + x[1])
+                mapping = {node: k for k,node in enumerate(nodes)}
+                
+                graph = nx.relabel_nodes(graph, mapping)
+
+                #total number of nodes change after removing nodes. 
+                self.n = len(graph.nodes)
+
+                for edge in graph.edges(): graph[edge[0]][edge[1]]['weight'] = random.randint(1, 5)
+
+                return graph 
 
 
-
-
-
+            return _get_level_8
         
-
-
-
-
      
     
     def get_shortest_path(self, graph, source, target):
@@ -347,17 +446,21 @@ class create_level():
 
 
 
-gen = create_level(n=10, is_jumbled=False)
-out, sh = gen.create_graph(level = 7)
+# gen = create_level(n=10, is_jumbled=False)
+# out, sh = gen.create_graph(level = 7)
+# print(out)
+# print(sh)
+
+level = 8
+
+# for _ in range(25):
+sh = f''
+
+while not sh.startswith('No'): #this is only for level 8
+
+    gen = create_level(n=10, is_jumbled=False)
+    out, sh = gen.create_graph(level = level)
+    if level!=8: break
+
 print(out)
 print(sh)
-
-
-# res = set()
-# for i in range(50):
-#     print(i)
-#     gen = create_level(n=20, is_jumbled=False)
-#     out, sh = gen.create_graph(level = 5)
-#     res.add(sh)
-
-# print(res, len(res))
