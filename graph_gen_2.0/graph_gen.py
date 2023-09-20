@@ -7,8 +7,6 @@ import math
 # For info on levels: refer to: 
 # https://docs.google.com/document/d/1ckwAyQpFihcgMUOrmI4VS_5Lsi7AdCMl/edit?usp=sharing&ouid=108292991556701680365&rtpof=true&sd=true
 
-
-
 class create_level():
     def __init__(self, n:int, is_jumbled:bool = False):
         f'''
@@ -27,7 +25,7 @@ class create_level():
         random.seed(10000*random.random())
 
     def create_graph(self, level:int):
-
+        
         f = self.get_level(level)
         graph = f(self.n)
         # self.n = len(graph.nodes) #sometimes, we add more nodes that n. Eg, level 3
@@ -45,13 +43,16 @@ class create_level():
 
         mapping = {k: chr(65 + i) for k,i in enumerate(node_order)}  # 65 is ASCII for 'A'
         graph = nx.relabel_nodes(graph, mapping)
-
-        shortest_path = self.get_shortest_path(graph, mapping[0], mapping[self.n-1])
     
         
         out = self.convert_adjArray_to_str(adj_array, dict(sorted(mapping.items(), key=lambda x:x[1])))
-
-        return out, shortest_path
+        
+        try:
+            shortest_path = self.get_shortest_path(graph, mapping[0], mapping[self.n-1])
+            return out, shortest_path
+        
+        except nx.exception.NetworkXNoPath as e:
+            return out, f'No possible path from {mapping[0]} to {mapping[self.n-1]}'
     
     def convert_adjArray_to_str(self, adj_array, mapping):
         new_line = '\n'
@@ -94,7 +95,7 @@ class create_level():
                 num_extra_paths = random.randint(1,2) #we want at max 2 additional paths in the graph
                 for _ in range(num_extra_paths):
                     #decide what nodes to connect with an extra path
-                    nodes_to_connect = random.sample(shortest_path, 2)
+                    nodes_to_connect = random.choices(shortest_path, k=2)
                     start_node, end_node = nodes_to_connect
                     #decide how many extra nodes should be there in the path that we are creating.
                     num_extra_nodes = random.randint(1, len(shortest_path))
@@ -129,7 +130,7 @@ class create_level():
         if level ==5 or level==6:
             def _get_level_5_6(n):
                 f'grid'
-                m = int(math.sqrt(n))+1
+                m = int(math.sqrt(n))+1 #+1 because otherwise for n =10, we get a 3x3 grids, where the total amount of permutations are not enough. 
                 # dimensions = m,m+random.randint(0,2)
                 dimensions = m,m
                 
@@ -140,35 +141,37 @@ class create_level():
                 #generate all shortest paths and simple paths
                 random.seed(10000*random.random())
                 shortest_path = random.choice(list(nx.all_shortest_paths(graph, start, end)))
-                all_other_paths = list(nx.all_simple_paths(graph, start, end))
+                all_paths = list(nx.all_simple_paths(graph, start, end))
 
                 #only keep simple paths that are longer than shortest path
                 
                 shortest_path_length = len(shortest_path)
-                all_other_paths = [path for path in all_other_paths if len(path) > shortest_path_length]
+                all_other_paths = [path for path in all_paths if len(path) > shortest_path_length]
 
                 random.seed(10000*random.random())
                 random.shuffle(all_other_paths)
 
                 #randomly select 3-5 paths from all paths, and remove the edges for the rest
-                kept_paths = random.sample(all_other_paths, random.randint(3,5))
+                kept_paths = random.choices(all_other_paths, k=random.randint(3,5))
 
                 #convert lists into correct format
                 kept_paths_edges = {(path[i], path[i+1]) for path in kept_paths for i in range(len(path) - 1)}
                 shortest_path_edges = {(shortest_path[i], shortest_path[i+1]) for i in range(len(shortest_path) - 1)}
 
                 #take the union
-                all_paths = kept_paths_edges | shortest_path_edges
+                all_paths = list(kept_paths_edges | shortest_path_edges)
 
                 #remove edges
                 for edge in list(graph.edges):
-                    if edge not in kept_paths_edges: graph.remove_edge(*edge)
+                    # if edge not in kept_paths_edges: graph.remove_edge(*edge)
+                    if edge not in all_paths: graph.remove_edge(*edge)
 
                 #remove any disconnected nodes. 
                 graph = self._remove_disconnected_nodes(graph, start = (0,0))
 
                 #renaming the nodes. 
-                mapping = {node: k for k,node in enumerate(graph.nodes)}
+                nodes = sorted([node for node in graph.nodes], key= lambda x: m*x[0] + x[1])
+                mapping = {node: k for k,node in enumerate(nodes)}
                 graph = nx.relabel_nodes(graph, mapping)
 
                 #total number of nodes change after removing nodes. 
@@ -179,15 +182,98 @@ class create_level():
                     for edge in graph.edges(): graph[edge[0]][edge[1]]['weight'] = random.randint(1, 5)
 
                 return graph 
-            
-                
+
 
             return _get_level_5_6
         
 
         if level ==7:
-            
+            def _get_level_7(n):
+                f'directed grid. Hence shortest path may not be the right solution'
+                m = int(math.sqrt(n))+1 #+1 because otherwise for n =10, we get a 3x3 grids, where the total amount of permutations are not enough. 
+                # dimensions = m,m+random.randint(0,2)
+                dimensions = m,m
                 
+                graph = nx.grid_2d_graph(*dimensions)
+                start, end = (0, 0), (dimensions[0]-1, dimensions[1]-1)
+
+
+                #generate all shortest paths and simple paths
+                random.seed(10000*random.random())
+                shortest_path = random.choice(list(nx.all_shortest_paths(graph, start, end)))
+                all_paths = list(nx.all_simple_paths(graph, start, end))
+
+                #only keep simple paths that are longer than shortest path
+                
+                shortest_path_length = len(shortest_path)
+                all_other_paths = [path for path in all_paths if len(path) > shortest_path_length]
+
+                
+
+                #randomly select 3-5 paths from all paths, and remove the edges for the rest
+                random.seed(10000*random.random())
+                random.shuffle(all_other_paths)
+                kept_paths = random.choices(all_other_paths, k=random.randint(3,5))
+
+                #convert lists into correct format
+                kept_paths_edges = {(path[i], path[i+1]) for path in kept_paths for i in range(len(path) - 1)}
+                shortest_path_edges = {(shortest_path[i], shortest_path[i+1]) for i in range(len(shortest_path) - 1)}
+
+                #take the union
+                all_edges = list(kept_paths_edges | shortest_path_edges) #rename this
+
+
+                #remove edges
+                for edge in list(graph.edges):
+                    if edge not in all_edges: graph.remove_edge(*edge)
+
+                #remove any disconnected nodes. 
+                graph = self._remove_disconnected_nodes(graph, start = (0,0))
+
+                #lets randomly choose 2 paths from all_paths, that will be valid solutions. This doesnt have to include the shortest path necessarily. 
+                random.shuffle(all_edges)
+                
+                forward_paths = random.choices(kept_paths, k=2)
+
+                #populate a new directional graph. The forward paths have forward directioned arrows. For all other paths, arrows are randomly directioned. 
+                graph = nx.DiGraph()
+                covered_nodes = []
+                for path in forward_paths:
+                    # for u,v in path:
+                    for i in range(len(path)-1):
+                        u,v = path[i], path[i+1]
+                        graph.add_edge(u,v)
+                        covered_nodes.append((u,v))
+                
+                for path in all_edges:
+                    for i in range(len(path)-1):
+                        u,v = path[i], path[i+1]
+                        if not (graph.has_edge(u,v) or graph.has_edge(v,u)):
+                            #randomly select direction
+                            (u,v) = (u,v) if random.random()<0.5 else (v,u)
+                            graph.add_edge(u,v)
+                
+
+                #renaming the nodes. 
+                nodes = sorted([node for node in graph.nodes], key= lambda x: m*x[0] + x[1])
+                mapping = {node: k for k,node in enumerate(nodes)}
+                
+                graph = nx.relabel_nodes(graph, mapping)
+
+                #total number of nodes change after removing nodes. 
+                self.n = len(graph.nodes)
+
+                for edge in graph.edges(): graph[edge[0]][edge[1]]['weight'] = random.randint(1, 5)
+
+                return graph
+            return _get_level_7
+        
+        if level==8:
+            pass
+
+
+
+
 
 
 
@@ -261,8 +347,8 @@ class create_level():
 
 
 
-gen = create_level(n=10, is_jumbled=True)
-out, sh = gen.create_graph(level = 5)
+gen = create_level(n=10, is_jumbled=False)
+out, sh = gen.create_graph(level = 7)
 print(out)
 print(sh)
 
