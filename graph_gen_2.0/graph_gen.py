@@ -27,57 +27,74 @@ class create_level():
     def create_graph(self, level:int):
         
         assert 1<=int(level)<=10
-        self.level = level
-        
-        f = self.get_level(level)
-        graph = f(self.n)
-        # self.n = len(graph.nodes) #sometimes, we add more nodes that n. Eg, level 3
-        
+
+        if 1<=level<=8:
+            self.level = level
+            
+            f = self.get_level(level)
+            graph = f(self.n)
+            # self.n = len(graph.nodes) #sometimes, we add more nodes that n. Eg, level 3
+            
 
 
-        # Convert the graph to an adjacency matrix
-        adj_matrix = nx.adjacency_matrix(graph, list(range(len(graph.nodes))))
-        adj_array = np.array(adj_matrix.todense())
-        
-        
+            # Convert the graph to an adjacency matrix
+            adj_matrix = nx.adjacency_matrix(graph, list(range(len(graph.nodes))))
+            adj_array = np.array(adj_matrix.todense())
+            
+            
 
-        node_order = list(range(len(graph.nodes)))
-        if self.is_jumbled: adj_array, node_order = self.jumble_adj_matrix(adj_array)
+            node_order = list(range(len(graph.nodes)))
+            if self.is_jumbled: adj_array, node_order = self.jumble_adj_matrix(adj_array)
 
-        mapping = {k: chr(65 + i) for k,i in enumerate(node_order)}  # 65 is ASCII for 'A'
-        graph = nx.relabel_nodes(graph, mapping)
+            mapping = {k: chr(65 + i) for k,i in enumerate(node_order)}  # 65 is ASCII for 'A'
+            graph = nx.relabel_nodes(graph, mapping)
+        
+            
+            out = self.convert_adjArray_to_str(adj_array, dict(sorted(mapping.items(), key=lambda x:x[1])))
+            
+            
+            try:
+                shortest_path = self.get_shortest_path(graph, mapping[0], mapping[self.n-1])
+                graph.clear()
+
+                # if level==8: #we want to ensure no solution
+                #     # print(shortest_path)
+                #     #if the code has been able to finish the self.get_shortest_path line, then there exists a solution, so we rerun till we get no solution
+                #     self.__init__(self.n, is_jumbled=self.is_jumbled)
+                #     out, shortest_path = self.create_graph(level = level)
+
+                return out, shortest_path
+            
+            
+            except nx.exception.NetworkXNoPath as e:
+                return out, f'No possible path from {mapping[0]} to {mapping[self.n-1]}'
+        
+        elif level==9:
+            self.level = level
+            
+            f = self.get_level(level)
+            graph, is_eulerian = f(self.n)
+
+            # Convert the graph to an adjacency matrix
+            adj_matrix = nx.adjacency_matrix(graph, list(range(len(graph.nodes))))
+            adj_array = np.array(adj_matrix.todense())
+            
+            
+
+            node_order = list(range(len(graph.nodes)))
+            if self.is_jumbled: adj_array, node_order = self.jumble_adj_matrix(adj_array)
+
+            mapping = {k: chr(65 + i) for k,i in enumerate(node_order)}  # 65 is ASCII for 'A'
+            graph = nx.relabel_nodes(graph, mapping)
+        
+            
+            out = self.convert_adjArray_to_str(adj_array, dict(sorted(mapping.items(), key=lambda x:x[1]))) 
+
+            solution = f'This is a valid eulerian graph' if is_eulerian else f'This is not a valid eulerian graph'
+            return out, solution
+            
+
     
-        
-        out = self.convert_adjArray_to_str(adj_array, dict(sorted(mapping.items(), key=lambda x:x[1])))
-        
-        
-        try:
-            shortest_path = self.get_shortest_path(graph, mapping[0], mapping[self.n-1])
-            graph.clear()
-
-            # if level==8: #we want to ensure no solution
-            #     # print(shortest_path)
-            #     #if the code has been able to finish the self.get_shortest_path line, then there exists a solution, so we rerun till we get no solution
-            #     self.__init__(self.n, is_jumbled=self.is_jumbled)
-            #     out, shortest_path = self.create_graph(level = level)
-
-            return out, shortest_path
-        
-        
-        except nx.exception.NetworkXNoPath as e:
-            return out, f'No possible path from {mapping[0]} to {mapping[self.n-1]}'
-    
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -382,6 +399,68 @@ class create_level():
 
 
             return _get_level_8
+
+        if level ==9:
+            
+            def _create_level_9(n):
+                #we want 50% of paths returned to be eulerian and the remaining to be not. So that the model can evaluate fairly. 
+                is_eulerian = random.choice([True, False])
+                ret = None
+
+                def create_eulerian_path_graph(nodes=n, edges=random.randint(n, 2*n), is_eulerian = is_eulerian):
+                    
+
+
+                    if is_eulerian:
+                        while True:
+                            G = nx.gnm_random_graph(nodes, edges, seed = int(100000*random.random()))
+                            odd_degree_nodes = [node for node, degree in dict(G.degree()).items() if degree % 2 == 1]
+
+                            if (len(odd_degree_nodes) == 2 or len(odd_degree_nodes) == 0) and nx.is_connected(G):
+
+                                ret = G
+                                break
+                    else:
+                        while True:
+                            G = nx.gnm_random_graph(nodes, edges, seed = int(100000*random.random()))
+                            odd_degree_nodes = [node for node, degree in dict(G.degree()).items() if degree % 2 == 1]
+
+                            if not (len(odd_degree_nodes) == 2 or len(odd_degree_nodes) == 0) and nx.is_connected(G):
+
+                                ret = G
+                                break
+                    
+                    return ret, is_eulerian
+                
+
+                graph, is_eulerian = create_eulerian_path_graph()
+                
+                #checking which node to start from, such that there will exist a valid eulerian path. In case that odd_degree_nodes==2, you can't start from any node 
+                if is_eulerian:
+                    start = None
+                    for i in list(graph.nodes):
+                        try:
+                            solution = list(nx.eulerian_path(graph, source = i))
+                            start = solution[0][0]
+                            break
+                        except:
+                            pass
+
+                    graph = self._get_ordered_graph(graph, source = start)
+                
+                return graph, is_eulerian
+            return _create_level_9
+
+                
+
+                            
+        
+    
+            
+
+
+
+        
         
      
     
@@ -451,16 +530,45 @@ class create_level():
 # print(out)
 # print(sh)
 
-level = 8
+# level = 8
 
-# for _ in range(25):
-sh = f''
+# # for _ in range(25):
+# sh = f''
 
-while not sh.startswith('No'): #this is only for level 8
+# while not sh.startswith('No'): #this is only for level 8
 
-    gen = create_level(n=10, is_jumbled=False)
-    out, sh = gen.create_graph(level = level)
-    if level!=8: break
+#     gen = create_level(n=10, is_jumbled=False)
+#     out, sh = gen.create_graph(level = level)
+#     if level!=8: break
 
+
+
+
+
+n = 20
+level = 9
+is_jumbled=False
+
+def get_graph_and_solution(n, level, is_jumbled = False):
+    f'given number of nodes, which level of graph to create and if the adjacency matrix has to be jumbled, get a valid adjacency matrix and solution'
+
+    assert 1<=level<=10, f'invalid level'
+    out, sh = None, None
+
+    if 1<=level<=7 or level ==9:
+        gen = create_level(n=n, is_jumbled=is_jumbled)
+        out, sh = gen.create_graph(level = level)
+    
+    if level==8:
+        while not sh.startswith('No'): #this is only for level 8
+
+            gen = create_level(n=10, is_jumbled=False)
+            out, sh = gen.create_graph(level = level)
+    
+    
+    return out, sh 
+
+out, sh = get_graph_and_solution(n, level, is_jumbled)
 print(out)
 print(sh)
+
