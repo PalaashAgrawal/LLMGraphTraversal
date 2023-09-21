@@ -26,8 +26,6 @@ class create_level():
 
     def create_graph(self, level:int):
         
-        assert 1<=int(level)<=10
-
         if 1<=level<=8:
             self.level = level
             
@@ -57,11 +55,6 @@ class create_level():
                 shortest_path = self.get_shortest_path(graph, mapping[0], mapping[self.n-1])
                 graph.clear()
 
-                # if level==8: #we want to ensure no solution
-                #     # print(shortest_path)
-                #     #if the code has been able to finish the self.get_shortest_path line, then there exists a solution, so we rerun till we get no solution
-                #     self.__init__(self.n, is_jumbled=self.is_jumbled)
-                #     out, shortest_path = self.create_graph(level = level)
 
                 return out, shortest_path
             
@@ -92,11 +85,36 @@ class create_level():
 
             solution = f'This is a valid eulerian graph' if is_eulerian else f'This is not a valid eulerian graph'
             return out, solution
+        
+        elif level==10:
+            f'for level 10, we will just use a random tree with weights, ie level 4'
+            self.level = 4
+
+            f = self.get_level(self.level)
+            graph = f(self.n)
+
+            # Convert the graph to an adjacency matrix
+            adj_matrix = nx.adjacency_matrix(graph, list(range(len(graph.nodes))))
+            adj_array = np.array(adj_matrix.todense())
+            
+            node_order = list(range(len(graph.nodes)))
+            if self.is_jumbled: adj_array, node_order = self.jumble_adj_matrix(adj_array)
+
+            mapping = {k: chr(65 + i) for k,i in enumerate(node_order)}  # 65 is ASCII for 'A'
+
+            graph = nx.relabel_nodes(graph, mapping)
+        
+            out = self.convert_adjArray_to_str(adj_array, dict(sorted(mapping.items(), key=lambda x:x[1]))) 
+
+            node_order = sorted([i for _,i in mapping.items()])
+            random_node = random.choice(node_order[1:-1])
             
 
-    
+            shortest_path = f'''Path from {node_order[0]} to {random_node}: {self.get_shortest_path(graph, node_order[0], random_node)}\nPath from {random_node} to {node_order[-1]}: {self.get_shortest_path(graph, random_node, node_order[-1])}'''
 
-
+            return out, shortest_path, (node_order[0], random_node, node_order[-1])
+            
+            
 
 
     def convert_adjArray_to_str(self, adj_array, mapping):
@@ -110,9 +128,7 @@ class create_level():
 
     def get_level(self, level):
     
-        
-         
-
+    
         if level==1:
             return  nx.path_graph
         
@@ -167,8 +183,6 @@ class create_level():
                     #add random weights 
                     for edge in graph.edges(): graph[edge[0]][edge[1]]['weight'] = random.randint(1, 5)
 
-                
-                
                 
                 return graph
 
@@ -368,12 +382,7 @@ class create_level():
                 #populate a new directional graph. The forward paths have forward directioned arrows. For all other paths, arrows are randomly directioned. 
                 graph = nx.DiGraph()
                 covered_nodes = []
-                # for path in forward_paths:
-                #     # for u,v in path:
-                #     for i in range(len(path)-1):
-                #         u,v = path[i], path[i+1]
-                #         graph.add_edge(u,v)
-                #         covered_nodes.append((u,v))
+
                 
                 for path in all_edges:
                     for i in range(len(path)-1):
@@ -451,18 +460,9 @@ class create_level():
                 return graph, is_eulerian
             return _create_level_9
 
+        raise Exception(f'invalid Level number')
                 
-
-                            
         
-    
-            
-
-
-
-        
-        
-     
     
     def get_shortest_path(self, graph, source, target):
         shortest_path = nx.shortest_path(graph, source=source, target=target, weight='weight', method='dijkstra')
@@ -485,9 +485,6 @@ class create_level():
             for j in range(n): #column
                 new_matrix[ordered_to_shuffled_mapping[i]][ordered_to_shuffled_mapping[j]] = matrix[i][j]
                 
-        
-
-            
         
         return new_matrix, shuffled_nodes
     
@@ -524,36 +521,17 @@ class create_level():
         return graph
 
 
+#_______________________________________________________________________________________________________________________________________
 
-# gen = create_level(n=10, is_jumbled=False)
-# out, sh = gen.create_graph(level = 7)
-# print(out)
-# print(sh)
-
-# level = 8
-
-# # for _ in range(25):
-# sh = f''
-
-# while not sh.startswith('No'): #this is only for level 8
-
-#     gen = create_level(n=10, is_jumbled=False)
-#     out, sh = gen.create_graph(level = level)
-#     if level!=8: break
-
-
-
-
-
-n = 20
-level = 9
+n = 10
+level = 10
 is_jumbled=False
 
 def get_graph_and_solution(n, level, is_jumbled = False):
     f'given number of nodes, which level of graph to create and if the adjacency matrix has to be jumbled, get a valid adjacency matrix and solution'
 
     assert 1<=level<=10, f'invalid level'
-    out, sh = None, None
+    out, sh = f'', f''
 
     if 1<=level<=7 or level ==9:
         gen = create_level(n=n, is_jumbled=is_jumbled)
@@ -562,13 +540,19 @@ def get_graph_and_solution(n, level, is_jumbled = False):
     if level==8:
         while not sh.startswith('No'): #this is only for level 8
 
-            gen = create_level(n=10, is_jumbled=False)
+            gen = create_level(n=n, is_jumbled=False)
             out, sh = gen.create_graph(level = level)
     
-    
-    return out, sh 
+    if level==10:
+        gen = create_level(n=n, is_jumbled=False)
+        out, sh, nodes = gen.create_graph(level = level)
+        
+        return out, sh, nodes
+    return out, sh, None
 
-out, sh = get_graph_and_solution(n, level, is_jumbled)
+out, sh, nodes = get_graph_and_solution(n, level, is_jumbled)
+
 print(out)
 print(sh)
+print(nodes)
 
