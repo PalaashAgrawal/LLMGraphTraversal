@@ -7,6 +7,39 @@ import math
 # For info on levels: refer to: 
 # https://docs.google.com/document/d/1ckwAyQpFihcgMUOrmI4VS_5Lsi7AdCMl/edit?usp=sharing&ouid=108292991556701680365&rtpof=true&sd=true
 
+
+def get_graph_and_solution(n, level, is_jumbled = False):
+    f'given number of nodes, which level of graph to create and if the adjacency matrix has to be jumbled, get a valid adjacency matrix and solution'
+
+    assert 1<=level<=10, f'invalid level'
+    out, sh = f'', f''
+
+    # if 1<=level<=7 or level ==9:
+    #     gen = create_level(n=n, is_jumbled=is_jumbled)
+    #     out, sh, nodes_to_traverse, nodes_in_graph = gen.create_graph(level = level)
+    
+    if level==8:
+        while not sh.startswith('No'): #this is only for level 8
+
+            gen = create_level(n=n, is_jumbled=is_jumbled)
+            out, sh, nodes_to_traverse, nodes_in_graph = gen.create_graph(level = level)
+
+    else: 
+    
+    # if level==10:
+        gen = create_level(n=n, is_jumbled=is_jumbled)
+        out, sh, nodes_to_traverse, nodes_in_graph = gen.create_graph(level = level)
+        
+        # return out, sh, nodes
+    return out, sh, nodes_to_traverse, nodes_in_graph
+
+
+
+
+
+
+
+
 class create_level():
     def __init__(self, n:int, is_jumbled:bool = False):
         f'''
@@ -25,6 +58,22 @@ class create_level():
         random.seed(10000*random.random())
 
     def create_graph(self, level:int):
+
+        f'''
+        returns
+        out - adjacency matrix in the form of a string, where the nodes are labelled A,B,C and so on. 
+
+        solution - graph traversal solution. Each graph has only one shortest solution possible. Format = A -> B -> C and so on. 
+        For levels 9 (is_eulerian problem), we return a specific string indicating if the graph is eulerian
+        For level 10, we provide 2 paths together corresponding to the 2 parts of the graph traversal. 
+
+        nodes_to_traverse - the starting and the ending node (represented by a letter of the alphabet) between which traversal happens. 
+        For level 9, we only provide the starting node (starting from which, if a eulerian path is possible or not)
+        For level 10, we provide 3 nodes, corresponding to the nodes that need to be covered in the graph traversal
+
+        max(node_order) - represents how many nodes there are in the graph (minus 1 because node order is 0-ordered). 
+        Hence the adjacency graph goes from A to chr(65 + max(node_order))
+        '''
         
         if 1<=level<=8:
             self.level = level
@@ -57,12 +106,11 @@ class create_level():
                 shortest_path = self.get_shortest_path(graph, mapping[0], mapping[self.n-1])
                 graph.clear()
 
-
-                return out, shortest_path, (mapping[0], mapping[self.n-1])
+                return out, shortest_path, (mapping[0], mapping[self.n-1]), max(node_order)
             
             
-            except nx.exception.NetworkXNoPath as e:
-                return out, f'No possible path from {mapping[0]} to {mapping[self.n-1]}', (mapping[0], mapping[self.n-1])
+            except nx.exception.NetworkXNoPath as e: #in the case of level 8
+                return out, f'No possible path from {mapping[0]} to {mapping[self.n-1]}', (mapping[0], mapping[self.n-1]), max(node_order)
         
         elif level==9:
             self.level = level
@@ -89,7 +137,7 @@ class create_level():
             out = self.convert_adjArray_to_str(adj_array, dict(sorted(mapping.items(), key=lambda x:x[1]))) 
 
             solution = f'This is a valid eulerian graph' if is_eulerian else f'This is not a valid eulerian graph'
-            return out, solution, starting_node
+            return out, solution, starting_node,  max(node_order)
         
         elif level==10:
             f'for level 10, we will just use a random tree with weights, ie level 4'
@@ -118,19 +166,11 @@ class create_level():
 
             shortest_path = f'''Path from {node_order[0]} to {random_node}: {self.get_shortest_path(graph, node_order[0], random_node)}\nPath from {random_node} to {node_order[-1]}: {self.get_shortest_path(graph, random_node, node_order[-1])}'''
 
-            return out, shortest_path, (node_order[0], random_node, node_order[-1])
+            return out, shortest_path, (node_order[0], random_node, node_order[-1]),  max(node_order)
             
             
 
 
-    def convert_adjArray_to_str(self, adj_array, mapping):
-        new_line = '\n'
-        out = f''''''
-        out+= f"   {' '.join(mapping.values())}"
-        for row_label, row in zip(mapping.values(), adj_array):
-            out+=f'''{new_line} {row_label} {' '.join(map(str, row))}'''
-
-        return out
 
     def get_level(self, level):
     
@@ -472,8 +512,8 @@ class create_level():
             return _create_level_9
 
         raise Exception(f'invalid Level number')
-                
-        
+    
+    
     
     def get_shortest_path(self, graph, source, target):
         shortest_path = nx.shortest_path(graph, source=source, target=target, weight='weight', method='dijkstra')
@@ -482,6 +522,15 @@ class create_level():
         return ret+str(shortest_path[-1])
         
 
+    def convert_adjArray_to_str(self, adj_array, mapping):
+        new_line = '\n'
+        out = f''''''
+        out+= f"   {' '.join(mapping.values())}"
+        for row_label, row in zip(mapping.values(), adj_array):
+            out+=f'''{new_line} {row_label} {' '.join(map(str, row))}'''
+
+        return out
+    
     def jumble_adj_matrix(self, matrix, is_directed = False):
         n = len(matrix)
         # Get a list of nodes and shuffle them to get a new sequence
@@ -499,12 +548,8 @@ class create_level():
         
         return new_matrix, shuffled_nodes
     
-    
-
     def _shuffle_list(self, arr):
         return sorted(list(range(len(arr))), key=lambda x: random.random())
-
-
 
     def _get_ordered_graph(self, graph, source = 0):
         f'Takes a networkx graph and relabels the nodes such that the node occurence is ordered. Logic -- dfs traversal iterates through the nodes in an ordered fashion'
@@ -531,20 +576,4 @@ class create_level():
         
         return graph
 
-
-#_______________________________________________________________________________________________________________________________________
-
-# n = 10
-# level = 10
-# is_jumbled=False
-
-
-
-
-
-# out, sh, nodes = get_graph_and_solution(n, level, is_jumbled)
-
-# print(out)
-# print(sh)
-# print(nodes)
 
