@@ -1,0 +1,11 @@
+Things to do:
+
+1. Create a standard k shot example list. Store them in csv
+2. create code for running the levels automatically, 
+3. evaluate the results. Partial credit???
+3.1 Testing the accuracy of evaluator itself. If we're going with partial credit, needs extra code. 
+
+
+4. storing the results in csv
+5. Random baselines. Whats the code for that. 
+6. 
