@@ -160,11 +160,11 @@ class create_level():
             out = self.convert_adjArray_to_str(adj_array, dict(sorted(mapping.items(), key=lambda x:x[1]))) 
 
             # node_order = sorted([i for _,i in mapping.items()])
-            node_order = [i for _,i in mapping.items()]
-            random_node = random.choice(node_order[1:-1])
+            node_order_ = [i for _,i in mapping.items()]
+            random_node = random.choice(node_order_[1:-1])
             
 
-            shortest_path = f'''Path from {node_order[0]} to {random_node}: {self.get_shortest_path(graph, node_order[0], random_node)}\nPath from {random_node} to {node_order[-1]}: {self.get_shortest_path(graph, random_node, node_order[-1])}'''
+            shortest_path = f'''Path from {node_order_[0]} to {random_node}: {self.get_shortest_path(graph, node_order_[0], random_node)}\nPath from {random_node} to {node_order_[-1]}: {self.get_shortest_path(graph, random_node, node_order_[-1])}'''
 
             return out, shortest_path, (node_order[0], random_node, node_order[-1]),  max(node_order)
             

@@ -61,7 +61,6 @@ Solution: {solution}
 
 
     #DO NOT CHANGE INDENTATION
-
     prompt = f''' Given is the adjacency matrix for a {is_weighted} {is_directed} graph containing {num_nodes +1} nodes labelled A to {chr(65+num_nodes)}. {definition_of_adjacency_matrix}.   
 
 {k_shot_prompt}
@@ -82,11 +81,16 @@ def get_question(level, goal_of_traversal, nodes_to_traverse):
     if 1<=level<=8:
         question = f'what is the {goal_of_traversal} path from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}?'
     elif level==9:
-        question = f'is the following a valid eulerian graph, if traversal is started from {nodes_to_traverse[0]}?'
+        question = f'is the following a valid eulerian graph, if traversal is started from {nodes_to_traverse}?'
     elif level==10: 
         question = f'What is the {goal_of_traversal} path to travel first from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}, and then from node node {nodes_to_traverse[1]} to node {nodes_to_traverse[2]}?'
 
     return question 
 
-prompt = get_prompt(n= 10,level = 6, is_jumbled = False, k = 1)
+
+
+# for level in range(1,11):
+#     print(level)
+#     prompt = get_prompt(n= 10,level = level, is_jumbled = False, k = 1)
+#     print(prompt)
     
