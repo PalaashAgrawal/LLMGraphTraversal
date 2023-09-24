@@ -72,7 +72,7 @@ Solution: {solution}
     '''
 
 
-    return prompt
+    return prompt, solution
 
 
 
@@ -89,5 +89,4 @@ def get_question(level, goal_of_traversal, nodes_to_traverse):
     return question 
 
 prompt = get_prompt(n= 10,level = 6, is_jumbled = False, k = 1)
-print(prompt)
     
