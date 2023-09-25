@@ -48,9 +48,6 @@ Solution: {solution}
         '''
         k_shot_prompt+=f'\n Given these examples, answer the following quesiton.'
 
-
-
-
 #______________________________________________________actual prompt________________________________________
     
     definition_of_isweighted = f'the cost of travelling between the two nodes' if is_weighted=='weighted' else f'whether there is a connection between the two nodes'
@@ -96,7 +93,7 @@ def get_question(level, goal_of_traversal, nodes_to_traverse):
 
 # level = 9
 # for k in [0,1,3]:
-#     prompt = get_prompt(n= 10,level = level, is_jumbled = False, k = k)
+#     prompt = get_prompt(n= 20,level = level, is_jumbled = False, k = k)
 #     print(prompt)
-#     prompt = get_prompt(n= 10,level = level, is_jumbled = True, k = k)
-#     print(prompt)
+    # prompt = get_prompt(n= 20,level = level, is_jumbled = True, k = k)
+    # print(prompt)

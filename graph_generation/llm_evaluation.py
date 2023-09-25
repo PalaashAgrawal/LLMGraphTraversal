@@ -40,7 +40,8 @@ identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
 
 # levels = range(1,11)
 # levels = range(1,9) #FIRST WE DO LEVEL 1 to 8, because there's no error in that
-levels = range(9,11)
+# levels = range(9,11)
+levels = [10]
 
 
 for model_id in identifiers:
@@ -90,7 +91,6 @@ for model_id in identifiers:
                 except:
                     response, is_correct, partial_correctness = f'', f'', f''
                 
-
                 # response, is_correct, partial_correctness = f'', f'', f''
 
                 # try:
@@ -121,7 +121,7 @@ for model_id in identifiers:
                 pandas_data[option]['evaluator_partial_correctness'].append(partial_correctness)
 
 
-
+                
                 for data in pandas_data[option]:
                     assert len(pandas_data[option][data]) == len(pandas_data[option]['prompt'])
 
@@ -130,11 +130,14 @@ for model_id in identifiers:
             res_dir.mkdir(parents = True, exist_ok= True)
             file = res_dir/f'k_{k}.xlsx'
 
+
+
             with pd.ExcelWriter(file, engine='xlsxwriter') as writer:
                 for option in pandas_data:
                     data =pandas_data[option]
                     df = pd.DataFrame(data = data)
                     df.to_excel(writer, sheet_name = option, index = False)
+            
 
         
                
