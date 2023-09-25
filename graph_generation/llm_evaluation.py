@@ -30,8 +30,8 @@ palm
 '''
 
 identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
-                                                    # 'gpt3.5', #UNCOMMENT
-                                                    # 'gpt4',
+                                                    'gpt3.5', #UNCOMMENT
+                                                    'gpt4',
                                                     'hermes_llama2',
                                                     'claude2',
                                                     'palm',
@@ -42,6 +42,7 @@ identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
 # levels = range(1,9) #FIRST WE DO LEVEL 1 to 8, because there's no error in that
 # levels = range(9,11)
 levels = [1,2,3,4,5,6,7,8,10]
+levels = [9]
 
 
 for model_id in identifiers:
@@ -79,6 +80,7 @@ for model_id in identifiers:
                 #FOR LOOP HERE for number of random examples
 
                 prompt, solution = get_prompt(n, level, is_jumbled, k)
+                print('prompt')
                 
 
                 #sometimes the prompt can exceed 4095 tokens. So we skip these using a simple heuristic. 

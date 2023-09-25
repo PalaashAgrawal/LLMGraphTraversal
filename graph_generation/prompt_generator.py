@@ -89,9 +89,9 @@ def get_question(level, goal_of_traversal, nodes_to_traverse):
 
 
 
-level =10
-prompt = get_prompt(n= 10,level = level, is_jumbled = True, k = 0)
-print(prompt)
+# level =10
+# prompt = get_prompt(n= 10,level = level, is_jumbled = True, k = 0)
+# print(prompt)
 
 # for level in range(1,11):
 #     print(level)
