@@ -78,9 +78,9 @@ Solution: {solution}
 def get_question(level, goal_of_traversal, nodes_to_traverse):
 
     if 1<=level<=8:
-        question = f'what is the {goal_of_traversal} path from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}? Return the sequence of nodes in response.'
+        question = f'What is the {goal_of_traversal} path from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}? Return the sequence of nodes in response.'
     elif level==9:
-        question = f'is the following a valid eulerian graph, if traversal is started from {nodes_to_traverse}? Return True or False in response.'
+        question = f'Is the following a valid eulerian graph, if traversal is started from {nodes_to_traverse}? Return True or False in response.'
     elif level==10: 
         question = f'What is the {goal_of_traversal} path to travel first from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}, and then from node node {nodes_to_traverse[1]} to node {nodes_to_traverse[2]}? Return 2 sequences of nodes in response.'
 
