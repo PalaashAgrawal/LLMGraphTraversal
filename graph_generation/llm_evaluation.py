@@ -30,28 +30,30 @@ palm
 '''
 
 identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
-                                                    'gpt3.5',
+                                                    # 'gpt3.5',
                                                     'gpt4',
-                                                    'hermes_llama2',
-                                                    'claude2',
-                                                    'palm',
+                                                    # 'hermes_llama2',
+                                                    # 'claude2',
+                                                    # 'palm',
                                                 ]
 
 
 # levels = range(1,11)
 # levels = range(1,9) #FIRST WE DO LEVEL 1 to 8, because there's no error in that
 # levels = range(9,11)
-levels = [1,2,3,4,5,6,7,8,10]
+# levels = [1,2,3,4,5,6,7,8,10]
+levels = [10]
 
 
 for model_id in identifiers:
     print(model_id)
     model = get_model(model_id)
-    
+
     for level in tqdm(levels, position = 0):
         k_shot_options = [0,1,3]
         for k in tqdm(k_shot_options, position = 1, leave = False):
-            options = ['o_10', 'o_20', 'o_20_jumbled']
+            # options = ['o_10', 'o_20', 'o_20_jumbled']
+            options = ['o_10']
             pandas_data = {option: {'prompt': [], 
                        'solution': [], 
                        'llm_response':[], 
@@ -70,7 +72,7 @@ for model_id in identifiers:
                     is_jumbled=False
                 elif option=='o_20_jumbled':
                     n=20
-                    is_jumbled =False
+                    is_jumbled =True
                 
                 #sometimes it gives random errors like AttributeError: choices in openAI api
                 
