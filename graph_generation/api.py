@@ -61,15 +61,25 @@ def evaluate_response(model_response, correct_response, model =  "openai/gpt-3.5
 
     return response.choices[0].message["content"]
 
-def evaluate_partial_response(model_response, correct_response, model = "openai/gpt-4", timeout = 60):
+def evaluate_partial_response(model_response, correct_response, primary_evaluator_response:str ='', model = "openai/gpt-4", timeout = 60):
     f'''
     we will evaluate the response for partial correctness from LLMs using another small LLM (by default, GPT 3.5). 
     In our case, partial correctness is defined as how many nodes was the model able to get from the beginning. 
+    THIS WILL ONLY RUN IF THE RESPONSE OF primary EVALUATOR (ie correct/wrong evaluator is correct)
     Input:
     model_response: response provided by the LLM 
     correct_response: ground truth for the shortest path. 
     ''' 
 #Given a node sequence, how many nodes were predicted correctly by the language model before a wrong node is encountered. 
+
+
+
+
+    if ('correct').lower() in primary_evaluator_response.lower(): return len(correct_response.split('->'))/len(correct_response.split('->'))
+
+
+
+
     prompt = f'''
     Given  two responses, the first given by a Langauge model, and the other is the ground truth response. 
     Evaluate the answer provided by the language model for partial correctness. Partial correctness is defined as follows.
@@ -116,11 +126,13 @@ def evaluate_partial_response(model_response, correct_response, model = "openai/
 
 
 
-#testing
-prompt, solution = get_prompt(10,1)
-llm_response = get_response(prompt)
-is_correct = evaluate_response(llm_response, solution)
-partial_credit = evaluate_partial_response(llm_response, solution)
+# #testing
+
+
+# prompt, solution = get_prompt(10,1)
+# llm_response = get_response(prompt)
+# is_correct = evaluate_response(llm_response, solution)
+# partial_credit = evaluate_partial_response(llm_response, solution)
 
 
 # get_response(prompt, timeout=1)

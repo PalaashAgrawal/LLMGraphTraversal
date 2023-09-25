@@ -39,7 +39,8 @@ identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
 
 
 # levels = range(1,11)
-levels = range(1,9) #FIRST WE DO LEVEL 1 to 8, because there's no error in that
+# levels = range(1,9) #FIRST WE DO LEVEL 1 to 8, because there's no error in that
+levels = range(9,11)
 
 
 for model_id in identifiers:
@@ -84,6 +85,7 @@ for model_id in identifiers:
                 try:
                     response = get_response(prompt, model = model)
                     is_correct = 'invalid input'
+                    # partial_correctness = evaluate_partial_response(response, solution, primary_evaluator_response = is_correct) if level not in [9,10] else 'N/A'
                     partial_correctness = evaluate_partial_response(response, solution) if level not in [9,10] else 'N/A'
                 except:
                     response, is_correct, partial_correctness = f'', f'', f''
