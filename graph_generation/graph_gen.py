@@ -119,7 +119,7 @@ class create_level():
             graph, is_eulerian, starting_node = f(self.n)
             
             # for cases when the graph is not eulerian, we just ask the model to start traversal from node 0. 
-            starting_node = 0 if starting_node is None else starting_node
+            starting_node = 'A' if starting_node is None else starting_node
 
             # Convert the graph to an adjacency matrix
             adj_matrix = nx.adjacency_matrix(graph, list(range(len(graph.nodes))))

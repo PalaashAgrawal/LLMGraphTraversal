@@ -11,7 +11,7 @@ def get_model(id):
     if id in model_dict: return model_dict[id]
     else:
         # print(list(model_dict.items()))
-        assert id in model_dict.values(), f'invalid identifier `id`'
+        assert id in model_dict.values(), f'invalid identifier {id}'
     
     return id
 

@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 
-def get_prompt(n, level, is_jumbled:bool, k=0):
+def get_prompt(n, level, is_jumbled:bool = False, k=0):
     f'''
     n = order of graph
     level = level of complexity of the graph as defined in the graph_gen script
@@ -79,11 +79,11 @@ Solution: {solution}
 def get_question(level, goal_of_traversal, nodes_to_traverse):
 
     if 1<=level<=8:
-        question = f'what is the {goal_of_traversal} path from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}?'
+        question = f'what is the {goal_of_traversal} path from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}? Return the sequence of nodes in response.'
     elif level==9:
-        question = f'is the following a valid eulerian graph, if traversal is started from {nodes_to_traverse}?'
+        question = f'is the following a valid eulerian graph, if traversal is started from {nodes_to_traverse}? Return True or False in response.'
     elif level==10: 
-        question = f'What is the {goal_of_traversal} path to travel first from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}, and then from node node {nodes_to_traverse[1]} to node {nodes_to_traverse[2]}?'
+        question = f'What is the {goal_of_traversal} path to travel first from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}, and then from node node {nodes_to_traverse[1]} to node {nodes_to_traverse[2]}? Return 2 sequences of nodes in response.'
 
     return question 
 
@@ -93,4 +93,10 @@ def get_question(level, goal_of_traversal, nodes_to_traverse):
 #     print(level)
 #     prompt = get_prompt(n= 10,level = level, is_jumbled = False, k = 1)
 #     print(prompt)
-    
+
+# level = 9
+# for k in [0,1,3]:
+#     prompt = get_prompt(n= 10,level = level, is_jumbled = False, k = k)
+#     print(prompt)
+#     prompt = get_prompt(n= 10,level = level, is_jumbled = True, k = k)
+#     print(prompt)
