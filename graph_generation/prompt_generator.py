@@ -2,6 +2,8 @@ from graph_gen import create_level, get_graph_and_solution
 import pandas as pd
 from pathlib import Path
 
+from tqdm import tqdm
+
 
 
 
@@ -92,8 +94,10 @@ def get_question(level, goal_of_traversal, nodes_to_traverse):
 #     print(prompt)
 
 # level = 9
-# for k in [0,1,3]:
-#     prompt = get_prompt(n= 20,level = level, is_jumbled = False, k = k)
-#     print(prompt)
-    # prompt = get_prompt(n= 20,level = level, is_jumbled = True, k = k)
-    # print(prompt)
+# for _ in tqdm(range(10)):
+#     for k in [0,1,3]:
+#         prompt = get_prompt(n= 20,level = level, is_jumbled = False, k = k)
+        
+#         # print(prompt)
+        # prompt = get_prompt(n= 20,level = level, is_jumbled = True, k = k)
+        # print(prompt)

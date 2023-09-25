@@ -483,6 +483,7 @@ class create_level():
                             if not (len(odd_degree_nodes) == 2 or len(odd_degree_nodes) == 0) and nx.is_connected(G):
 
                                 ret = G
+                                
                                 break
                     
                     return ret, is_eulerian

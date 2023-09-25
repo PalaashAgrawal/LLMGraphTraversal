@@ -30,7 +30,7 @@ palm
 '''
 
 identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
-                                                    # 'gpt3.5',
+                                                    'gpt3.5',
                                                     'gpt4',
                                                     'hermes_llama2',
                                                     'claude2',
@@ -41,13 +41,13 @@ identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
 # levels = range(1,11)
 # levels = range(1,9) #FIRST WE DO LEVEL 1 to 8, because there's no error in that
 # levels = range(9,11)
-levels = [10]
+levels = [1,2,3,4,5,6,7,8,10]
 
 
 for model_id in identifiers:
     print(model_id)
     model = get_model(model_id)
-
+    
     for level in tqdm(levels, position = 0):
         k_shot_options = [0,1,3]
         for k in tqdm(k_shot_options, position = 1, leave = False):
@@ -85,7 +85,7 @@ for model_id in identifiers:
                 
                 try:
                     response = get_response(prompt, model = model)
-                    is_correct = 'invalid input'
+                    is_correct = evaluate_response(response, solution)
                     # partial_correctness = evaluate_partial_response(response, solution, primary_evaluator_response = is_correct) if level not in [9,10] else 'N/A'
                     partial_correctness = evaluate_partial_response(response, solution) if level not in [9,10] else 'N/A'
                 except:
