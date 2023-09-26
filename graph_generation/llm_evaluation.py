@@ -84,7 +84,7 @@ for model_id in identifiers:
                         # partial_correctness = evaluate_partial_response(response, solution) if level not in [8,9,10] else 'N/A'
                     except:
                         response, is_correct,  = f'', f''
-                        partial_correctness = f''
+                        # partial_correctness = f''
 
                     pandas_data[option]['prompt'].append(prompt)
                     pandas_data[option]['solution'].append(solution)
