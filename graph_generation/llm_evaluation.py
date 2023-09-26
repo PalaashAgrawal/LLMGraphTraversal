@@ -7,16 +7,12 @@ import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 import sys
-result_dir = Path('results_prelim'); assert result_dir.exists()
+
+result_dir = Path('results_prelim'); 
+if not result_dir.exists(): result_dir.mkdir(parents = True, exist_ok= True)
 
 
-
-
-
-n = 10 
-level = 2
-is_jumbled = False
-k=1
+num_examples_per_level = 10
 
 
 
@@ -30,7 +26,7 @@ palm
 '''
 
 identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
-                                                    'gpt3.5', #UNCOMMENT
+                                                    'gpt3.5', 
                                                     'gpt4',
                                                     'hermes_llama2',
                                                     'claude2',
@@ -38,12 +34,7 @@ identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
                                                 ]
 
 
-# levels = range(1,11)
-# levels = range(1,9) #FIRST WE DO LEVEL 1 to 8, because there's no error in that
-# levels = range(9,11)
-# levels = [1,2,3,4,5,6,7,8,10]
-levels = [10]
-# levels = [1]
+levels = range(1,11)
 
 
 for model_id in identifiers:
@@ -53,13 +44,13 @@ for model_id in identifiers:
     for level in tqdm(levels, position = 0):
         k_shot_options = [0,1,3]
         for k in tqdm(k_shot_options, position = 1, leave = False):
-            # options = ['o_10'] if level==9 else ['o_10', 'o_20', 'o_20_jumbled'] #UNCOMMENT
-            options = ['o_10']
+            options = ['o_10'] if level==9 else ['o_10', 'o_20', 'o_20_jumbled'] #UNCOMMENT
+            # options = ['o_10']
             pandas_data = {option: {'prompt': [], 
                        'solution': [], 
                        'llm_response':[], 
                        'evaluator_response': [],
-                       'evaluator_partial_correctness': [],
+                    #    'evaluator_partial_correctness': [],
                        } for option in options
                         
                         }
@@ -75,32 +66,31 @@ for model_id in identifiers:
                     n=20
                     is_jumbled =True
                 
-                #sometimes it gives random errors like AttributeError: choices in openAI api
-                
                 
                 #FOR LOOP HERE for number of random examples
+                for _ in range(num_examples_per_level):
 
-                prompt, solution = get_prompt(n, level, is_jumbled, k)
-                
+                    prompt, solution = get_prompt(n, level, is_jumbled, k)
+                    
 
-                #sometimes the prompt can exceed 4095 tokens. So we skip these using a simple heuristic. 
-                if model_id=='gpt3.5' and len(prompt)>4500: continue
-                if model_id=='hermes_llama2' and len(prompt)>4000: continue
-                
-                try:
-                    response = get_response(prompt, model = model)
-                    is_correct = evaluate_response(response, solution)
-                    # partial_correctness = evaluate_partial_response(response, solution, primary_evaluator_response = is_correct) if level not in [9,10] else 'N/A'
-                    partial_correctness = evaluate_partial_response(response, solution) if level not in [8,9,10] else 'N/A'
-                except:
-                    response, is_correct, partial_correctness = f'', f'', f''
+                    #sometimes the prompt can exceed 4095 tokens. So we skip these using a simple heuristic. 
+                    if model_id=='gpt3.5' and len(prompt)>4500: continue
+                    if model_id=='hermes_llama2' and len(prompt)>4500: continue
+                    
+                    #sometimes it gives random errors like AttributeError: choices in openAI api
+                    try:
+                        response = get_response(prompt, model = model)
+                        is_correct = evaluate_response(response, solution)
+                        # partial_correctness = evaluate_partial_response(response, solution) if level not in [8,9,10] else 'N/A'
+                    except:
+                        response, is_correct,  = f'', f''
+                        partial_correctness = f''
 
-
-                pandas_data[option]['prompt'].append(prompt)
-                pandas_data[option]['solution'].append(solution)
-                pandas_data[option]['llm_response'].append(response)
-                pandas_data[option]['evaluator_response'].append(is_correct)
-                pandas_data[option]['evaluator_partial_correctness'].append(partial_correctness)
+                    pandas_data[option]['prompt'].append(prompt)
+                    pandas_data[option]['solution'].append(solution)
+                    pandas_data[option]['llm_response'].append(response)
+                    pandas_data[option]['evaluator_response'].append(is_correct)
+                    # pandas_data[option]['evaluator_partial_correctness'].append(partial_correctness)
 
 
                 
