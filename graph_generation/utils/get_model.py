@@ -6,7 +6,8 @@ def get_model(id):
                   'hermes_llama2':  'nousresearch/nous-hermes-llama2-13b', 
                   'claude2':        'anthropic/claude-2',
                   'palm':           'google/palm-2-chat-bison',
-
+                  'gpt3.5_16K':     'openai/gpt-3.5-turbo-16k',
+                    
                   }
     if id in model_dict: return model_dict[id]
     else:
