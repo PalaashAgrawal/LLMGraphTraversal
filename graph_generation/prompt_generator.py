@@ -8,12 +8,13 @@ from tqdm import tqdm
 
 
 
-def get_prompt(n, level, is_jumbled:bool = False, k=0):
+def get_prompt(n, level, is_jumbled:bool = False, k=0, include_answer_format = False):
     f'''
     n = order of graph
     level = level of complexity of the graph as defined in the graph_gen script
     is_jumbled = whether the graph nodes are jumbled in order
     k: whether the prompt is 0 shot, 1 shot or 3 shot
+    include_answer_format: only applicable if k=0. We include an example response format, since without it, models tend to give extremely long responses. 
     '''
     assert n in [10,20], f'n (or order of graph) can only be 10 or 20'
     assert 1<=level<=10, f'invalid level'
@@ -49,6 +50,9 @@ def get_prompt(n, level, is_jumbled:bool = False, k=0):
 Solution: {solution}
         '''
         k_shot_prompt+=f'\n Given these examples, answer the following quesiton.'
+    
+    elif not is_kshot and include_answer_format:
+        k_shot_prompt =f'\n Example response format: A -> B -> C -> D and so on.'
 
 #______________________________________________________actual prompt________________________________________
     

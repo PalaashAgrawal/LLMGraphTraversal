@@ -25,16 +25,16 @@ palm
 '''
 
 identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
-                                                    'gpt3.5', 
+                                                    # 'gpt3.5', 
                                                     # 'gpt4',
-                                                    # 'hermes_llama2',
+                                                    'hermes_llama2',
                                                     # 'claude2',
                                                     # 'palm',
                                                 ]
 
 
-# levels = range(1,11)
-levels = [1,2,3,4,5,6,7,8,10]
+levels = range(1,11)
+# levels = [1,2,3,4,5,6,7,8,10]
 
 
 for model_id in identifiers:
@@ -42,12 +42,10 @@ for model_id in identifiers:
     model = get_model(model_id)
 
     for level in tqdm(levels, position = 0):
-        k_shot_options = [3]
-        # k_shot_options = [0,1,3]
+        k_shot_options = [0,1,3]
         
         for k in tqdm(k_shot_options, position = 1, leave = False):
             options = ['o_10'] if level==9 else ['o_10', 'o_20', 'o_20_jumbled'] #UNCOMMENT
-            options = ['o_10'] if level==9 else ['o_20', 'o_20_jumbled']
             pandas_data = {option: {'prompt': [], 
                        'solution': [], 
                        'llm_response':[], 
@@ -73,12 +71,15 @@ for model_id in identifiers:
                 for _ in tqdm(range(num_examples_per_level), position=3, leave = False):
 
                     prompt, solution = get_prompt(n, level, is_jumbled, k)
+                    if model_id=='hermes_llama2' and k==0: 
+                        prompt, solution = get_prompt(n, level, is_jumbled, k, include_answer_format=True)
                     
 
                     #sometimes the prompt can exceed 4095 tokens. So we skip these using a simple heuristic. 
                     if model_id=='gpt3.5' and len(prompt)>4500: 
                         model = get_model('openai/gpt-3.5-turbo-16k')
                     if model_id=='hermes_llama2' and len(prompt)>4500: continue
+                    
                     
                     #sometimes it gives random errors like AttributeError: choices in openAI api
                     try:
