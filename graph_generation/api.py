@@ -19,12 +19,6 @@ def get_response(message, model = "openai/gpt-3.5-turbo", timeout = 60):
     '''
     
     response = openai.ChatCompletion.create(
-    # model="meta-llama/llama-2-13b-chat",  
-    # model = 'google/palm-2-chat-bison',
-    # model = 'nousresearch/nous-hermes-llama2-13b',
-    # model = "meta-llama/codellama-34b-instruct",  
-    # model = "anthropic/claude-2",
-    # model = "openai/gpt-3.5-turbo",	
     model = model,
     messages=[{"role": "user", "content": message}],
     headers=headers,  # Pass the headers to the API call
@@ -46,7 +40,6 @@ def evaluate_response(model_response, correct_response, model =  "openai/gpt-3.5
     Given these two responses, the first given by a Langauge model, and the other is the ground truth response. 
     Evaluate if the underlying answer provided by the language model is the same as the ground truth response. 
     Answer in only one word -- "Correct" (if the underlying language model response is the same as ground truth) or "Wrong" (if the underlying language model response is different from the ground truth.)
-    If the answer is not clearly given by the LLM, return "indefinite"
     
     Language model response: {model_response}
 

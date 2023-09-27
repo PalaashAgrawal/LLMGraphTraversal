@@ -8,12 +8,11 @@ from pathlib import Path
 from tqdm import tqdm
 import sys
 
-result_dir = Path('results_prelim'); 
+result_dir = Path('results'); 
 if not result_dir.exists(): result_dir.mkdir(parents = True, exist_ok= True)
 
 
 num_examples_per_level = 10
-
 
 
 f'''
@@ -68,7 +67,7 @@ for model_id in identifiers:
                 
                 
                 #FOR LOOP HERE for number of random examples
-                for _ in range(num_examples_per_level):
+                for _ in tqdm(range(num_examples_per_level), position=3, leave = False):
 
                     prompt, solution = get_prompt(n, level, is_jumbled, k)
                     
