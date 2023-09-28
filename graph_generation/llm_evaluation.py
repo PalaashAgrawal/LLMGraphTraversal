@@ -25,11 +25,11 @@ palm
 '''
 
 identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
-                                                    # 'gpt3.5', 
-                                                    # 'gpt4',
+                                                    'gpt3.5', 
+                                                    'gpt4',
                                                     'hermes_llama2',
-                                                    # 'claude2',
-                                                    # 'palm',
+                                                    'claude2',
+                                                    'palm',
                                                 ]
 
 
@@ -43,9 +43,11 @@ for model_id in identifiers:
 
     for level in tqdm(levels, position = 0):
         k_shot_options = [0,1,3]
+        # k_shot_options = [3]
         
         for k in tqdm(k_shot_options, position = 1, leave = False):
             options = ['o_10'] if level==9 else ['o_10', 'o_20', 'o_20_jumbled'] #UNCOMMENT
+            # options = ['o_10']
             pandas_data = {option: {'prompt': [], 
                        'solution': [], 
                        'llm_response':[], 
