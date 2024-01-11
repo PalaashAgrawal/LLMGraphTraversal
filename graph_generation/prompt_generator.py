@@ -8,12 +8,13 @@ from tqdm import tqdm
 
 
 
-def get_prompt(n, level, is_jumbled:bool = False, k=0, include_answer_format = False):
+def get_prompt(n, level, is_jumbled:bool = False, k=0, prompt_method = None, include_answer_format = False):
     f'''
     n = order of graph
     level = level of complexity of the graph as defined in the graph_gen script
     is_jumbled = whether the graph nodes are jumbled in order
     k: whether the prompt is 0 shot, 1 shot or 3 shot
+    prompt_method: either None (for just plain prompots), or one of [`CoT`, `Path_Compare`]
     include_answer_format: only applicable if k=0. We include an example response format, since without it, models tend to give extremely long responses. 
     '''
     assert n in [10,20], f'n (or order of graph) can only be 10 or 20'
@@ -25,6 +26,8 @@ def get_prompt(n, level, is_jumbled:bool = False, k=0, include_answer_format = F
     is_directed = 'directed' if level in [7,8] else 'undirected'
     goal_of_traversal = f'shortest' if is_weighted=='unweighted' else f'least cost'
 
+    if prompt_method: assert prompt_method in ["CoT", "pathCompare"], f"Invalid Option for argument prompt_method. Choose one of 'CoT' or 'Path_Compare'"
+    
 #___________________________________________________k_shot prompts_________________________________________
     
     is_kshot = k>0
@@ -52,7 +55,7 @@ Solution: {solution}
         k_shot_prompt+=f'\n Given these examples, answer the following quesiton.'
     
     elif not is_kshot and include_answer_format:
-        k_shot_prompt =f'\n Example response format: A -> B -> C -> D and so on.'
+        k_shot_prompt =f'\n The format of the path is: A -> B -> C -> D and so on.'
 
 #______________________________________________________actual prompt________________________________________
     
@@ -62,15 +65,19 @@ Solution: {solution}
     adjacency_matrix, solution, nodes_to_traverse, num_nodes = get_graph_and_solution(n, level, is_jumbled)
     # nodes_to_traverse = eval(nodes_to_traverse)
 
+    jumbled_prompt = f' in jumbled order' if is_jumbled else f'' 
 
+    advanced_prompt = get_advPrompt(prompt_method, nodes_to_traverse)
     #DO NOT CHANGE INDENTATION
-    prompt = f''' Given is the adjacency matrix for a {is_weighted} {is_directed} graph containing {num_nodes +1} nodes labelled A to {chr(65+num_nodes)}. {definition_of_adjacency_matrix}.   
+    prompt = f''' Given is the adjacency matrix for a {is_weighted} {is_directed} graph containing {num_nodes +1} nodes labelled A to {chr(65+num_nodes)}{jumbled_prompt}. {definition_of_adjacency_matrix}.   
 
 {k_shot_prompt}
 
 {get_question(level, goal_of_traversal, nodes_to_traverse)}
 
 {adjacency_matrix}
+
+{advanced_prompt}
     '''
 
 
@@ -89,6 +96,12 @@ def get_question(level, goal_of_traversal, nodes_to_traverse):
         question = f'What is the {goal_of_traversal} path to travel first from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}, and then from node node {nodes_to_traverse[1]} to node {nodes_to_traverse[2]}? Return 2 sequences of nodes in response.'
 
     return question 
+
+def get_advPrompt(prompt_method, nodes_to_traverse):
+    if prompt_method is None: return ''
+    if prompt_method=='CoT': return f"Let's think step by step."
+    if prompt_method=='pathCompare': return f"Let's list down all the possible paths from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}, and compare to get the answer."
+    
 
 
 
