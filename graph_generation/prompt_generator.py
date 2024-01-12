@@ -67,7 +67,7 @@ Solution: {solution}
 
     jumbled_prompt = f' in jumbled order' if is_jumbled else f'' 
 
-    advanced_prompt = get_advPrompt(prompt_method, nodes_to_traverse)
+    advanced_prompt = get_advPrompt(prompt_method, nodes_to_traverse, level)
     #DO NOT CHANGE INDENTATION
     prompt = f''' Given is the adjacency matrix for a {is_weighted} {is_directed} graph containing {num_nodes +1} nodes labelled A to {chr(65+num_nodes)}{jumbled_prompt}. {definition_of_adjacency_matrix}.   
 
@@ -97,10 +97,13 @@ def get_question(level, goal_of_traversal, nodes_to_traverse):
 
     return question 
 
-def get_advPrompt(prompt_method, nodes_to_traverse):
+def get_advPrompt(prompt_method, nodes_to_traverse, level = 1):
     if prompt_method is None: return ''
     if prompt_method=='CoT': return f"Let's think step by step."
-    if prompt_method=='pathCompare': return f"Let's list down all the possible paths from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}, and compare to get the answer."
+    if prompt_method=='pathCompare': 
+        if 1<=level<=8: return f"Let's list down all the possible paths from node {nodes_to_traverse[0]} to node {nodes_to_traverse[1]}, and compare the cost to get the answer."
+        if level==9: return f"Let's list down all the possible paths starting from {nodes_to_traverse} to check if eulerian condition is met."
+        if level==10: return f"Let's list down all the possible paths from node {nodes_to_traverse[0]} to node {nodes_to_traverse[2]}, to check if {nodes_to_traverse[1]} lies in it, and compare the cost to get the answer."
     
 
 

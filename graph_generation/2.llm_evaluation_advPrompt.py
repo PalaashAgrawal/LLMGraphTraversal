@@ -34,15 +34,19 @@ identifiers = [sys.argv[1]] if len(sys.argv)>1 else [
 
 
 # levels = range(1,11)
-levels = [1,2,3,4]
+# levels = [1,2,3,4]
+levels = [5,6,7,8,9,10]
 # levels = [1,2,3,4,5,6,7,8,10]
 
+# prompt_methods = ['CoT', 'pathCompare']
+prompt_methods = ['pathCompare']
 
 
 
 
 
-for prompt_method in ['CoT', 'pathCompare']:
+
+for prompt_method in prompt_methods:
     for model_id in identifiers:
         print(model_id)
         model = get_model(model_id)
@@ -54,6 +58,9 @@ for prompt_method in ['CoT', 'pathCompare']:
             for k in tqdm(k_shot_options, position = 1, leave = False):
                 # options = ['o_10'] if level==9 else ['o_10', 'o_20', 'o_20_jumbled'] #UNCOMMENT
                 options = ['o_10']
+
+                # if level ==9: continue
+                # else: options = ['o_20', 'o_20_jum']
 
                 pandas_data = {option: {'prompt': [], 
                         'solution': [], 
@@ -93,7 +100,8 @@ for prompt_method in ['CoT', 'pathCompare']:
                         #sometimes it gives random errors like AttributeError: choices in openAI api
                         try:
                             response = get_response(prompt, model = model)
-                            is_correct = evaluate_response(response, solution)
+                            # is_correct = evaluate_response(response, solution)
+                            is_correct = ''
                             # partial_correctness = evaluate_partial_response(response, solution) if level not in [8,9,10] else 'N/A'
                         except:
                             response, is_correct,  = f'', f''
