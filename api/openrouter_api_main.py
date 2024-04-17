@@ -1,7 +1,7 @@
 import openai
 
 openai.api_base = "https://openrouter.ai/api/v1"
-openai.api_key = "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" #replace with your own api key. 
+openai.api_key = "" #replace with your own api key from openrouter.ai. 
 
 
 headers = {
